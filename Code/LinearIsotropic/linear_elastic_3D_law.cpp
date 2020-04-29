@@ -1,9 +1,9 @@
 //
-//   Project Name:        KratosSolidMechanicsApplication $
-//   Created by:          $Author:            JMCarbonell $
-//   Last modified by:    $Co-Author:                     $
-//   Date:                $Date:                July 2015 $
-//   Revision:            $Revision:                  0.0 $
+//   Project Name:        Linear isotropic 3D Material $
+//   
+//   
+//   
+//   
 //
 //
 
@@ -78,43 +78,6 @@ double& LinearElastic3DLaw::GetValue( const Variable<double>& rThisVariable, dou
 
 //*****************************MATERIAL RESPONSES*************************************
 //************************************************************************************
-
-//compute response from kirchhoff law
-// void  LinearElastic3DLaw::CalculateMaterialResponsePK2 (Parameters& rValues)
-// {
-
-//   this->CalculateMaterialResponseKirchhoff (rValues);
-
-//   //1.- Obtain parameters
-//   Flags & Options                    = rValues.GetOptions();
-
-//   Vector& StressVector               = rValues.GetStressVector();
-//   Vector& StrainVector               = rValues.GetStrainVector();
-
-//   const Matrix& DeformationGradientF = rValues.GetDeformationGradientF();
-//   const double& DeterminantF         = rValues.GetDeterminantF();
-
-//   Matrix& ConstitutiveMatrix         = rValues.GetConstitutiveMatrix();
-
-//   //2.-Green-Lagrange Strain:
-//   if(Options.Is( ConstitutiveLaw::USE_ELEMENT_PROVIDED_STRAIN ))
-//     {
-//       TransformStrains (StrainVector, DeformationGradientF, StrainMeasure_Almansi, StrainMeasure_GreenLagrange);
-//     }
-
-//   //3.-Calculate Total PK2 stress
-//   if( Options.Is( ConstitutiveLaw::COMPUTE_STRESS ) )
-//     {
-//       TransformStresses(StressVector, DeformationGradientF, DeterminantF, StressMeasure_Kirchhoff, StressMeasure_PK2);
-//     }
-
-//   //4.-Calculate PK2 constitutive tensor
-//   if( Options.Is( ConstitutiveLaw::COMPUTE_CONSTITUTIVE_TENSOR ) )
-//     {
-//       PullBackConstitutiveMatrix(ConstitutiveMatrix, DeformationGradientF);
-//     }
-
-// }
 
 void  LinearElastic3DLaw::CalculateMaterialResponsePK2 (Parameters& rValues)
 {
@@ -218,10 +181,6 @@ void  LinearElastic3DLaw::CalculateMaterialResponsePK2 (Parameters& rValues)
         mStrainEnergy = 0.5 * inner_prod(StrainVector,StressVector); //Belytschko Nonlinear Finite Elements pag 226 (5.4.3) : w = 0.5*E:C:E
     }
 
-    //std::cout<<" Strain "<<StrainVector<<std::endl;
-    //std::cout<<" Stress "<<StressVector<<std::endl;
-    //Matrix& ConstitutiveMatrix = rValues.GetConstitutiveMatrix();
-    //std::cout<<" Constitutive "<<ConstitutiveMatrix<<std::endl;
 }
 
 
