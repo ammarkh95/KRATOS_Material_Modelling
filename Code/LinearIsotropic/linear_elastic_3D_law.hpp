@@ -1,10 +1,5 @@
 //
-//   Project Name:        KratosSolidMechanicsApplication $
-//   Created by:          $Author:            JMCarbonell $
-//   Last modified by:    $Co-Author:                     $
-//   Date:                $Date:                July 2015 $
-//   Revision:            $Revision:                  0.0 $
-//
+//Project Name:        Linear isotropic 3D Material $
 //
 
 #if !defined (KRATOS_LINEAR_ELASTIC_3D_LAW_H_INCLUDED)
