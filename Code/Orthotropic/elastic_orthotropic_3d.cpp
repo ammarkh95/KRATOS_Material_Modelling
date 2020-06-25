@@ -291,15 +291,35 @@ int ElasticOrthotropic3D::Check(
     KRATOS_CHECK_VARIABLE_KEY(YOUNG_MODULUS_Z);
     KRATOS_ERROR_IF(rMaterialProperties[YOUNG_MODULUS_Z] < 0.0) << "YOUNG_MODULUS_Z is negative." << std::endl;
 
+    KRATOS_CHECK_VARIABLE_KEY(SHEAR_MODULUS_XY);
+    KRATOS_ERROR_IF(rMaterialProperties[SHEAR_MODULUS_XY] < 0.0) << "SHEAR_MODULUS_XY is negative." << std::endl;
 
+    KRATOS_CHECK_VARIABLE_KEY(SHEAR_MODULUS_YZ);
+    KRATOS_ERROR_IF(rMaterialProperties[SHEAR_MODULUS_YZ] < 0.0) << "SHEAR_MODULUS_YZ is negative." << std::endl;
+
+    KRATOS_CHECK_VARIABLE_KEY(SHEAR_MODULUS_XZ);
+    KRATOS_ERROR_IF(rMaterialProperties[SHEAR_MODULUS_XZ] < 0.0) << "SHEAR_MODULUS_XZ is negative." << std::endl;
 
     KRATOS_CHECK_VARIABLE_KEY(POISSON_RATIO_XY);
     const double tolerance = 1.0e-12;
     const double nu_upper_bound = 0.5;
     const double nu_lower_bound = -1.0;
-    const double nu = rMaterialProperties[POISSON_RATIO_XY];
-    KRATOS_ERROR_IF((nu_upper_bound - nu) < tolerance) << "POISSON_RATIO_XY is above the upper bound 0.5." << std::endl;
-    KRATOS_ERROR_IF((nu - nu_lower_bound) < tolerance) << "POISSON_RATIO_XY is below the lower bound -1.0." << std::endl;
+    const double nu_1 = rMaterialProperties[POISSON_RATIO_XY];
+	
+
+    KRATOS_ERROR_IF((nu_upper_bound - nu_1) < tolerance) << "POISSON_RATIO_XY is above the upper bound 0.5." << std::endl;
+    KRATOS_ERROR_IF((nu_1 - nu_lower_bound) < tolerance) << "POISSON_RATIO_XY is below the lower bound -1.0." << std::endl;
+	
+	KRATOS_CHECK_VARIABLE_KEY(POISSON_RATIO_XZ);
+	const double nu_2 = rMaterialProperties[POISSON_RATIO_XZ];
+	KRATOS_ERROR_IF((nu_upper_bound - nu_2) < tolerance) << "POISSON_RATIO_XZ is above the upper bound 0.5." << std::endl;
+    KRATOS_ERROR_IF((nu_2 - nu_lower_bound) < tolerance) << "POISSON_RATIO_XZ is below the lower bound -1.0." << std::endl;
+	
+	
+	KRATOS_CHECK_VARIABLE_KEY(POISSON_RATIO_YZ);
+	const double nu_3 = rMaterialProperties[POISSON_RATIO_YZ];
+	KRATOS_ERROR_IF((nu_upper_bound - nu_3) < tolerance) << "POISSON_RATIO_YZ is above the upper bound 0.5." << std::endl;
+    KRATOS_ERROR_IF((nu_3 - nu_lower_bound) < tolerance) << "POISSON_RATIO_YZ is below the lower bound -1.0." << std::endl;
 
     KRATOS_CHECK_VARIABLE_KEY(DENSITY);
     KRATOS_ERROR_IF(rMaterialProperties[DENSITY] < 0.0) << "DENSITY is negative." << std::endl;
@@ -335,28 +355,30 @@ void ElasticOrthotropic3D::CalculateElasticMatrix(
 	const double v23 = r_material_properties[POISSON_RATIO_YZ];
 	const double v13 = r_material_properties[POISSON_RATIO_XZ];
 	
+	const double G12 = r_material_properties[SHEAR_MODULUS_XY];
+	const double G13 = r_material_properties[SHEAR_MODULUS_XZ];
+	const double G23 = r_material_properties[SHEAR_MODULUS_YZ];
+	
 	this->CheckClearElasticMatrix(rConstitutiveMatrix);
+	
+	const double v21 =(E2*v12)/E1;
+	const double v31 =(E3*v13)/E1;	
+	const double v32 =(E3*v23)/E2;	
 
-    const double P1 = 1.0/(E2*E2*v12*v12 + 2.0*E3*E2*v12*v13*v23 + E3*E2*v13*v13 - E1*E2 + E1*E3*v23*v23);
-    const double P2 = E1*E1;
-    const double P3 = E2*E2;
-	const double P4 = E1*v23 + E2*v12*v13;
-    const double P5 = E2*v12 + E3*v13*v23;
-	const double P6 = E3*E3;
+    const double Upsilon = (1.0)/(1.0-v12*v21-v23*v32-v13*v31-2.0*v21*v32*v13);
 
-
-	rConstitutiveMatrix(0, 0) = -P1*P2*(- E3*v23*v23 + E2);
-	rConstitutiveMatrix(0, 1) = -E1*E2*P1*P5;
-	rConstitutiveMatrix(0, 2) = -E2*E3*P1*(E1*v13 + E1*v12*v23);
-	rConstitutiveMatrix(1, 0) = -E1*E2*P1*P5;
-	rConstitutiveMatrix(1, 1) = -P1*P3*(- E3*v13*v13 + E1);
-	rConstitutiveMatrix(1, 2) = -E2*E3*P1*P4;
-	rConstitutiveMatrix(2, 0) = -E1*E2*E3*P1*(v13 + v12*v23);
-	rConstitutiveMatrix(2, 1) = -E2*E3*P1*P4;
-	rConstitutiveMatrix(2, 2) = -E2*E3*P1*(- E2*v12*v12 + E1);
-	rConstitutiveMatrix(3, 3) = (E2*P2)/(P2 + v12*(P2 + P3) + E1*E2)/2.0;
-	rConstitutiveMatrix(4, 4) = (E3*P3)/(P3 + v23*(P3 + P6) + E2*E3)/2.0;
-	rConstitutiveMatrix(5, 5) = (E3*P2)/(P2 + v13*(P2 + P6) + E1*E3)/2.0;
+	rConstitutiveMatrix(0, 0) =  E1*Upsilon*(1.0-v23*v32);
+	rConstitutiveMatrix(0, 1) =  E1*Upsilon*(v21+v31*v23);
+	rConstitutiveMatrix(0, 2) =  E1*Upsilon*(v31+v21*v32);
+	rConstitutiveMatrix(1, 0) =  E1*Upsilon*(v21+v31*v23);
+	rConstitutiveMatrix(1, 1) =  E2*Upsilon*(1.0-v13*v31);
+	rConstitutiveMatrix(1, 2) =  E2*Upsilon*(v32+v12*v31);
+	rConstitutiveMatrix(2, 0) =  E1*Upsilon*(v31+v21*v32);
+	rConstitutiveMatrix(2, 1) =  E2*Upsilon*(v32+v12*v31);
+	rConstitutiveMatrix(2, 2) =  E3*Upsilon*(1.0-v12*v21);
+	rConstitutiveMatrix(3, 3) =  G12;
+	rConstitutiveMatrix(4, 4) =  G13;
+	rConstitutiveMatrix(5, 5) =  G23;
 
 
 }
@@ -378,32 +400,38 @@ void ElasticOrthotropic3D::CalculatePK2Stress(
     const double v12 = r_material_properties[POISSON_RATIO_XY];
 	const double v23 = r_material_properties[POISSON_RATIO_YZ];
 	const double v13 = r_material_properties[POISSON_RATIO_XZ];
-
-    const double P1 = 1.0/(E2*E2*v12*v12 + 2.0*E3*E2*v12*v13*v23 + E3*E2*v13*v13 - E1*E2 + E1*E3*v23*v23);
-    const double P2 = E1*E1;
-    const double P3 = E2*E2;
-	const double P4 = E1*v23 + E2*v12*v13;
-    const double P5 = E2*v12 + E3*v13*v23;
-	const double P6 = E3*E3;
 	
-	
-	const double p11 = -P1*P2*(- E3*v23*v23 + E2);
-	const double p12 = -E1*E2*P1*P5;
- 	const double p13= -E2*E3*P1*(E1*v13 + E1*v12*v23);
- 	const double p22= -P1*P3*(- E3*v13*v13 + E1);
- 	const double p23= -E2*E3*P1*P4;
- 	const double p33= -E2*E3*P1*(- E2*v12*v12 + E1);
- 	const double p44= (E2*P2)/(P2 + v12*(P2 + P3) + E1*E2)/2.0;
- 	const double p55= (E3*P3)/(P3 + v23*(P3 + P6) + E2*E3)/2.0;
- 	const double p66= (E3*P2)/(P2 + v13*(P2 + P6) + E1*E3)/2.0;
+	const double G12 = r_material_properties[SHEAR_MODULUS_XY];
+	const double G13 = r_material_properties[SHEAR_MODULUS_XZ];
+	const double G23 = r_material_properties[SHEAR_MODULUS_YZ];
 	
 
-    rStressVector[0] =  p11 * rStrainVector[0] + p12 * rStrainVector[1] + p13 * rStrainVector[2];
-    rStressVector[1] =  p12 * rStrainVector[0] + p22 * rStrainVector[1] + p23 * rStrainVector[2];
-    rStressVector[2] =  p13 * rStrainVector[0] + p23 *  rStrainVector[1] + p33 * rStrainVector[2];
-    rStressVector[3] = p44 * rStrainVector[3];
-    rStressVector[4] = p55 * rStrainVector[4];
-    rStressVector[5] = p66 * rStrainVector[5];
+	const double v21 =(E2*v12)/E1;
+	const double v31 =(E3*v13)/E1;	
+	const double v32 =(E3*v23)/E2;	
+
+    const double Upsilon = (1.0)/(1.0-v12*v21-v23*v32-v13*v31-2.0*v21*v32*v13);
+
+	const double c11 =  E1*Upsilon*(1.0-v23*v32);
+	const double c12 =  E1*Upsilon*(v21+v31*v23);
+	const double c13 =  E1*Upsilon*(v31+v21*v32);
+	const double c21 =  E1*Upsilon*(v21+v31*v23);
+	const double c22 =  E2*Upsilon*(1.0-v13*v31);
+	const double c23 =  E2*Upsilon*(v32+v12*v31);
+	const double c31 =  E1*Upsilon*(v31+v21*v32);
+	const double c32 =  E2*Upsilon*(v32+v12*v31);
+	const double c33 =  E3*Upsilon*(1.0-v12*v21);
+	const double c44 =  G12;
+	const double c55 =  G13;
+	const double c66 =  G23;
+	
+
+    rStressVector[0] =  c11 * rStrainVector[0] + c12 * rStrainVector[1] + c13 * rStrainVector[2];
+    rStressVector[1] =  c21 * rStrainVector[0] + c22 * rStrainVector[1] + c23 * rStrainVector[2];
+    rStressVector[2] =  c31 * rStrainVector[0] + c32 *  rStrainVector[1] + c33 * rStrainVector[2];
+    rStressVector[3] = c44 * rStrainVector[3];
+    rStressVector[4] = c55 * rStrainVector[4];
+    rStressVector[5] = c66 * rStrainVector[5];
 }
 
 /***********************************************************************************/

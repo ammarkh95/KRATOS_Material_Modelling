@@ -321,26 +321,26 @@ void AmmarIsotropic3D::CalculateElasticMatrix(
     const Properties& r_material_properties = rValues.GetMaterialProperties();
     const double E = r_material_properties[YOUNG_MODULUS];
     const double NU = r_material_properties[POISSON_RATIO];
+	
 
     this->CheckClearElasticMatrix(rConstitutiveMatrix);
 
-    const double c1 = E / (( 1.00 + NU ) * ( 1 - 2 * NU ) );
-    const double c2 = c1 * ( 1 - NU );
-    const double c3 = c1 * NU;
-    const double c4 = c1 * 0.5 * ( 1 - 2 * NU );
+    const double c1 = E*NU/(1.0+NU)/(1.0-2.0*NU);
+    const double c2 = E/(1.0+NU)/2.0;
 
-    rConstitutiveMatrix( 0, 0 ) = c2;
-    rConstitutiveMatrix( 0, 1 ) = c3;
-    rConstitutiveMatrix( 0, 2 ) = c3;
-    rConstitutiveMatrix( 1, 0 ) = c3;
-    rConstitutiveMatrix( 1, 1 ) = c2;
-    rConstitutiveMatrix( 1, 2 ) = c3;
-    rConstitutiveMatrix( 2, 0 ) = c3;
-    rConstitutiveMatrix( 2, 1 ) = c3;
-    rConstitutiveMatrix( 2, 2 ) = c2;
-    rConstitutiveMatrix( 3, 3 ) = c4;
-    rConstitutiveMatrix( 4, 4 ) = c4;
-    rConstitutiveMatrix( 5, 5 ) = c4;
+
+    rConstitutiveMatrix( 0, 0 ) = (c1+2.0*c2);
+    rConstitutiveMatrix( 0, 1 ) = c1;
+    rConstitutiveMatrix( 0, 2 ) = c1;
+    rConstitutiveMatrix( 1, 0 ) = c1;
+    rConstitutiveMatrix( 1, 1 ) = (c1+2.0*c2);
+    rConstitutiveMatrix( 1, 2 ) = c1;
+    rConstitutiveMatrix( 2, 0 ) = c1;
+    rConstitutiveMatrix( 2, 1 ) = c1;
+    rConstitutiveMatrix( 2, 2 ) = (c1+2.0*c2);
+    rConstitutiveMatrix( 3, 3 ) = c2;
+    rConstitutiveMatrix( 4, 4 ) = c2;
+    rConstitutiveMatrix( 5, 5 ) = c2;
 }
 
 /***********************************************************************************/
@@ -356,17 +356,15 @@ void AmmarIsotropic3D::CalculatePK2Stress(
     const double E = r_material_properties[YOUNG_MODULUS];
     const double NU = r_material_properties[POISSON_RATIO];
 
-    const double c1 = E / ((1.00 + NU) * (1 - 2 * NU));
-    const double c2 = c1 * (1 - NU);
-    const double c3 = c1 * NU;
-    const double c4 = c1 * 0.5 * (1 - 2 * NU);
+    const double c1 = E*NU/(1.0+NU)/(1.0-2.0*NU);
+    const double c2 = E/(1.0+NU)/2.0;
 
-    rStressVector[0] = c2 * rStrainVector[0] + c3 * rStrainVector[1] + c3 * rStrainVector[2];
-    rStressVector[1] = c3 * rStrainVector[0] + c2 * rStrainVector[1] + c3 * rStrainVector[2];
-    rStressVector[2] = c3 * rStrainVector[0] + c3 * rStrainVector[1] + c2 * rStrainVector[2];
-    rStressVector[3] = c4 * rStrainVector[3];
-    rStressVector[4] = c4 * rStrainVector[4];
-    rStressVector[5] = c4 * rStrainVector[5];
+    rStressVector[0] = (c1+2.0*c2) * rStrainVector[0] + c1 * rStrainVector[1] + c1 * rStrainVector[2];
+    rStressVector[1] = c1 * rStrainVector[0] + (c1+2.0*c2) * rStrainVector[1] + c1 * rStrainVector[2];
+    rStressVector[2] = c1 * rStrainVector[0] + c1 * rStrainVector[1] + (c1+2.0*c2)* rStrainVector[2];
+    rStressVector[3] = c2 * rStrainVector[3];
+    rStressVector[4] = c2 * rStrainVector[4];
+    rStressVector[5] = c2 * rStrainVector[5];
 }
 
 /***********************************************************************************/

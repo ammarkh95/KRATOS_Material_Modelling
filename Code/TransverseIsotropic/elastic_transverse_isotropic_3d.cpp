@@ -292,9 +292,14 @@ int ElasticTransverseIsotropic3D::Check(
     const double tolerance = 1.0e-12;
     const double nu_upper_bound = 0.5;
     const double nu_lower_bound = -1.0;
-    const double nu = rMaterialProperties[POISSON_RATIO_XY];
-    KRATOS_ERROR_IF((nu_upper_bound - nu) < tolerance) << "POISSON_RATIO_XY is above the upper bound 0.5." << std::endl;
-    KRATOS_ERROR_IF((nu - nu_lower_bound) < tolerance) << "POISSON_RATIO_XY is below the lower bound -1.0." << std::endl;
+    const double nu_1 = rMaterialProperties[POISSON_RATIO_XY];
+    KRATOS_ERROR_IF((nu_upper_bound - nu_1) < tolerance) << "POISSON_RATIO_XY is above the upper bound 0.5." << std::endl;
+    KRATOS_ERROR_IF((nu_1 - nu_lower_bound) < tolerance) << "POISSON_RATIO_XY is below the lower bound -1.0." << std::endl;
+
+    KRATOS_CHECK_VARIABLE_KEY(POISSON_RATIO_XZ);
+    const double nu_2 = rMaterialProperties[POISSON_RATIO_XZ];
+    KRATOS_ERROR_IF((nu_upper_bound - nu_2) < tolerance) << "POISSON_RATIO_XZ is above the upper bound 0.5." << std::endl;
+    KRATOS_ERROR_IF((nu_2 - nu_lower_bound) < tolerance) << "POISSON_RATIO_XZ is below the lower bound -1.0." << std::endl;
 
     KRATOS_CHECK_VARIABLE_KEY(DENSITY);
     KRATOS_ERROR_IF(rMaterialProperties[DENSITY] < 0.0) << "DENSITY is negative." << std::endl;
@@ -326,28 +331,27 @@ void ElasticTransverseIsotropic3D::CalculateElasticMatrix(
     const double E_t = r_material_properties[YOUNG_MODULUS_Y];
     const double NU_p = r_material_properties[POISSON_RATIO_XY];
 	const double NU_pt = r_material_properties[POISSON_RATIO_XZ];
+	const double G_t   = r_material_properties[SHEAR_MODULUS_XZ];
 
     this->CheckClearElasticMatrix(rConstitutiveMatrix);
 
-    const double c1 = 1.0/(E_p*E_p*NU_p*NU_p + 2.0*E_t*E_p*NU_p*NU_pt*NU_pt + E_t*E_p*NU_pt*NU_pt - E_p*E_p + E_p*E_t*NU_pt*NU_pt);
-    const double c2 = E_p*E_p;
-    const double c3 = E_p*E_p;
-	const double c4 = E_p*NU_pt + E_p*NU_p*NU_pt;
-    const double c5 = E_p*NU_p +  E_t*NU_pt*NU_pt;
-	const double c6 = E_t*E_t;
+    const double NU_tp = (E_t*NU_pt)/E_p;
+    const double G_p = (E_p)/2.0*(1.0+NU_p);
+    const double Upsilon = 1.0/(1.0+NU_p)*(1.0-NU_p-2.0*NU_pt*NU_tp);
 
-    rConstitutiveMatrix( 0, 0 ) = -c1*c2*(- E_t*NU_pt*NU_pt + E_p);
-    rConstitutiveMatrix( 0, 1 ) = -E_p*E_p*c1*c5;
-    rConstitutiveMatrix( 0, 2 ) = -E_p*E_t*c1*(E_p*NU_pt + E_p*NU_p*NU_pt);
-    rConstitutiveMatrix( 1, 0 ) = -E_p*E_p*c1*c5;
-    rConstitutiveMatrix( 1, 1 ) = -c1*c3*(- E_t*NU_pt*NU_pt + E_p);
-    rConstitutiveMatrix( 1, 2 ) = -E_p*E_t*c1*c4;
-    rConstitutiveMatrix( 2, 0 ) = -E_p*E_p*E_t*c1*(NU_pt + NU_p*NU_pt);
-    rConstitutiveMatrix( 2, 1 ) = -E_p*E_t*c1*c4;
-    rConstitutiveMatrix( 2, 2 ) = -E_p*E_t*c1*(- E_p*NU_p*NU_p + E_p);
-    rConstitutiveMatrix( 3, 3 ) = (E_p*c2)/(c2 + NU_p*(c2 + c3) + E_p*E_p)/2.0;
-    rConstitutiveMatrix( 4, 4 ) = (E_t*c3)/(c3 + NU_pt*(c3 + c6) + E_p*E_t)/2.0;
-    rConstitutiveMatrix( 5, 5 ) = (E_t*c2)/(c2 + NU_pt*(c2 + c6) + E_p*E_t)/2.0;
+
+    rConstitutiveMatrix( 0, 0 ) = E_p*Upsilon*(1.0-NU_pt*NU_tp);
+    rConstitutiveMatrix( 0, 1 ) = E_p*Upsilon*(NU_p+ NU_pt*NU_tp);
+    rConstitutiveMatrix( 0, 2 ) = E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
+    rConstitutiveMatrix( 1, 0 ) = E_p*Upsilon*(NU_p+ NU_pt*NU_tp);
+    rConstitutiveMatrix( 1, 1 ) = E_p*Upsilon*(1.0- NU_pt*NU_tp);
+    rConstitutiveMatrix( 1, 2 ) = E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
+    rConstitutiveMatrix( 2, 0 ) = E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
+    rConstitutiveMatrix( 2, 1 ) = E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
+    rConstitutiveMatrix( 2, 2 ) = E_t*Upsilon*(1.0- NU_p*NU_p);
+    rConstitutiveMatrix( 3, 3 ) = G_p;
+    rConstitutiveMatrix( 4, 4 ) = G_t;
+    rConstitutiveMatrix( 5, 5 ) = G_t;
 }
 
 /***********************************************************************************/
@@ -364,32 +368,31 @@ void ElasticTransverseIsotropic3D::CalculatePK2Stress(
     const double E_t = r_material_properties[YOUNG_MODULUS_Y];
     const double NU_p = r_material_properties[POISSON_RATIO_XY];
 	const double NU_pt = r_material_properties[POISSON_RATIO_XZ];
+	const double G_t   = r_material_properties[SHEAR_MODULUS_XZ];
+	
+	const double NU_tp = (E_t*NU_pt)/E_p;
+    const double G_p = (E_p)/(2.0*(1.0+NU_p));
+    const double Upsilon = 1.0/(1.0-NU_p*NU_p-NU_pt*NU_tp-NU_pt*NU_tp-2.0*NU_p*NU_pt*NU_tp);
 
-    const double c1 = 1.0/(E_p*E_p*NU_p*NU_p + 2.0*E_t*E_p*NU_p*NU_pt*NU_pt + E_t*E_p*NU_pt*NU_pt - E_p*E_p + E_p*E_t*NU_pt*NU_pt);
-    const double c2 = E_p*E_p;
-    const double c3 = E_p*E_p;
-	const double c4 = E_p*NU_pt + E_p*NU_p*NU_pt;
-    const double c5 = E_p*NU_p +  E_t*NU_pt*NU_pt;
-	const double c6 = E_t*E_t;
-	
-	
-	const double p11 = -c1*c2*(- E_t*NU_pt*NU_pt + E_p);
-	const double p12 = -E_p*E_p*c1*c5;
- 	const double p13= -E_p*E_t*c1*(E_p*NU_pt + E_p*NU_p*NU_pt);
- 	const double p22= -c1*c3*(- E_t*NU_pt*NU_pt + E_p);
- 	const double p23= -E_p*E_t*c1*c4;
- 	const double p33= -E_p*E_t*c1*(- E_p*NU_p*NU_p + E_p);
- 	const double p44= (E_p*c2)/(c2 + NU_p*(c2 + c3) + E_p*E_p)/2.0;
- 	const double p55= (E_t*c3)/(c3 + NU_pt*(c3 + c6) + E_p*E_t)/2.0;
- 	const double p66= (E_t*c2)/(c2 + NU_pt*(c2 + c6) + E_p*E_t)/2.0;
-	
+    const double c11 =  E_p*Upsilon*(1.0-NU_pt*NU_tp);
+	const double c12 =  E_p*Upsilon*(NU_p+ NU_pt*NU_tp);
+	const double c13 =  E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
+	const double c21 =  E_p*Upsilon*(NU_p+ NU_pt*NU_tp);
+	const double c22 =  E_p*Upsilon*(1.0- NU_pt*NU_tp);
+	const double c23 =  E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
+	const double c31 =  E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
+	const double c32 =  E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
+	const double c33 =  E_t*Upsilon*(1.0- NU_p*NU_p);
+	const double c44 =  G_p;
+	const double c55 =  G_t;
+	const double c66 =  G_t;
 
-    rStressVector[0] =  p11 * rStrainVector[0] + p12 * rStrainVector[1] + p13 * rStrainVector[2];
-    rStressVector[1] =  p12 * rStrainVector[0] + p22 * rStrainVector[1] + p23 * rStrainVector[2];
-    rStressVector[2] =  p13 * rStrainVector[0] + p23 *  rStrainVector[1] + p33 * rStrainVector[2];
-    rStressVector[3] = p44 * rStrainVector[3];
-    rStressVector[4] = p55 * rStrainVector[4];
-    rStressVector[5] = p66 * rStrainVector[5];
+    rStressVector[0] =  c11 * rStrainVector[0] + c12 * rStrainVector[1] + c13 * rStrainVector[2];
+    rStressVector[1] =  c21 * rStrainVector[0] + c22 * rStrainVector[1] + c23 * rStrainVector[2];
+    rStressVector[2] =  c31 * rStrainVector[0] + c32 *  rStrainVector[1] + c33 * rStrainVector[2];
+    rStressVector[3] = c44 * rStrainVector[3];
+    rStressVector[4] = c55 * rStrainVector[4];
+    rStressVector[5] = c66 * rStrainVector[5];
 }
 
 /***********************************************************************************/
