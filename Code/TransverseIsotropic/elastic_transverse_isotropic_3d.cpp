@@ -327,31 +327,31 @@ void ElasticTransverseIsotropic3D::CalculateElasticMatrix(
     )
 {
     const Properties& r_material_properties = rValues.GetMaterialProperties();
-    const double E_p = r_material_properties[YOUNG_MODULUS_X];
-    const double E_t = r_material_properties[YOUNG_MODULUS_Y];
-    const double NU_p = r_material_properties[POISSON_RATIO_XY];
-	const double NU_pt = r_material_properties[POISSON_RATIO_XZ];
-	const double G_t   = r_material_properties[SHEAR_MODULUS_XZ];
+    const double E_1 = r_material_properties[YOUNG_MODULUS_X];
+    const double E_2 = r_material_properties[YOUNG_MODULUS_Y];
+    const double NU_12 = r_material_properties[POISSON_RATIO_XY];
+	const double NU_23 = r_material_properties[POISSON_RATIO_YZ];
+	const double G_12   = r_material_properties[SHEAR_MODULUS_XY];
 
     this->CheckClearElasticMatrix(rConstitutiveMatrix);
 
-    const double NU_tp = (E_t*NU_pt)/E_p;
-    const double G_p = (E_p)/2.0*(1.0+NU_p);
-    const double Upsilon = 1.0/(1.0+NU_p)*(1.0-NU_p-2.0*NU_pt*NU_tp);
+	const double NU_21 = (E_2*NU_12)/E_1;
+    const double G_23 = (E_2)/(2.0*(1.0+NU_23));
+    const double Upsilon = 1.0/(1.0-NU_23*NU_23-2*NU_12*NU_21-2*NU_23*NU_21*NU_12);
 
 
-    rConstitutiveMatrix( 0, 0 ) = E_p*Upsilon*(1.0-NU_pt*NU_tp);
-    rConstitutiveMatrix( 0, 1 ) = E_p*Upsilon*(NU_p+ NU_pt*NU_tp);
-    rConstitutiveMatrix( 0, 2 ) = E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
-    rConstitutiveMatrix( 1, 0 ) = E_p*Upsilon*(NU_p+ NU_pt*NU_tp);
-    rConstitutiveMatrix( 1, 1 ) = E_p*Upsilon*(1.0- NU_pt*NU_tp);
-    rConstitutiveMatrix( 1, 2 ) = E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
-    rConstitutiveMatrix( 2, 0 ) = E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
-    rConstitutiveMatrix( 2, 1 ) = E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
-    rConstitutiveMatrix( 2, 2 ) = E_t*Upsilon*(1.0- NU_p*NU_p);
-    rConstitutiveMatrix( 3, 3 ) = G_p;
-    rConstitutiveMatrix( 4, 4 ) = G_t;
-    rConstitutiveMatrix( 5, 5 ) = G_t;
+    rConstitutiveMatrix( 0, 0 ) = E_1*Upsilon*(1.0-NU_23*NU_23);
+    rConstitutiveMatrix( 0, 1 ) = E_1*Upsilon*(NU_21+ NU_21*NU_23);
+    rConstitutiveMatrix( 0, 2 ) = E_1*Upsilon*(NU_21+ NU_21*NU_23);
+    rConstitutiveMatrix( 1, 0 ) = E_1*Upsilon*(NU_21+ NU_21*NU_23);
+    rConstitutiveMatrix( 1, 1 ) = E_2*Upsilon*(1.0- NU_12*NU_21);
+    rConstitutiveMatrix( 1, 2 ) = E_2*Upsilon*(NU_23+ NU_12*NU_21);
+    rConstitutiveMatrix( 2, 0 ) = E_1*Upsilon*(NU_21+ NU_21*NU_23);
+    rConstitutiveMatrix( 2, 1 ) = E_2*Upsilon*(NU_23+ NU_12*NU_21);
+    rConstitutiveMatrix( 2, 2 ) = E_2*Upsilon*(1.0- NU_12*NU_21);
+    rConstitutiveMatrix( 3, 3 ) = G_12;
+    rConstitutiveMatrix( 4, 4 ) = G_12;
+    rConstitutiveMatrix( 5, 5 ) = G_23;
 }
 
 /***********************************************************************************/
@@ -364,28 +364,28 @@ void ElasticTransverseIsotropic3D::CalculatePK2Stress(
     )
 {
     const Properties& r_material_properties = rValues.GetMaterialProperties();
-    const double E_p = r_material_properties[YOUNG_MODULUS_X];
-    const double E_t = r_material_properties[YOUNG_MODULUS_Y];
-    const double NU_p = r_material_properties[POISSON_RATIO_XY];
-	const double NU_pt = r_material_properties[POISSON_RATIO_XZ];
-	const double G_t   = r_material_properties[SHEAR_MODULUS_XZ];
+    const double E_1 = r_material_properties[YOUNG_MODULUS_X];
+    const double E_2 = r_material_properties[YOUNG_MODULUS_Y];
+    const double NU_12 = r_material_properties[POISSON_RATIO_XY];
+	const double NU_23 = r_material_properties[POISSON_RATIO_YZ];
+	const double G_12   = r_material_properties[SHEAR_MODULUS_XY];
 	
-	const double NU_tp = (E_t*NU_pt)/E_p;
-    const double G_p = (E_p)/(2.0*(1.0+NU_p));
-    const double Upsilon = 1.0/(1.0-NU_p*NU_p-NU_pt*NU_tp-NU_pt*NU_tp-2.0*NU_p*NU_pt*NU_tp);
+	const double NU_21 = (E_2*NU_12)/E_1;
+    const double G_23 = (E_2)/(2.0*(1.0+NU_23));
+    const double Upsilon = 1.0/(1.0-NU_23*NU_23-2*NU_12*NU_21-2*NU_23*NU_21*NU_12);
 
-    const double c11 =  E_p*Upsilon*(1.0-NU_pt*NU_tp);
-	const double c12 =  E_p*Upsilon*(NU_p+ NU_pt*NU_tp);
-	const double c13 =  E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
-	const double c21 =  E_p*Upsilon*(NU_p+ NU_pt*NU_tp);
-	const double c22 =  E_p*Upsilon*(1.0- NU_pt*NU_tp);
-	const double c23 =  E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
-	const double c31 =  E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
-	const double c32 =  E_p*Upsilon*(NU_tp+ NU_p*NU_tp);
-	const double c33 =  E_t*Upsilon*(1.0- NU_p*NU_p);
-	const double c44 =  G_p;
-	const double c55 =  G_t;
-	const double c66 =  G_t;
+    const double c11 =  E_1*Upsilon*(1.0-NU_23*NU_23);
+	const double c12 =  E_1*Upsilon*(NU_21+ NU_21*NU_23);
+	const double c13 =  E_1*Upsilon*(NU_21+ NU_21*NU_23);
+	const double c21 =  E_1*Upsilon*(NU_21+ NU_21*NU_23);
+	const double c22 =  E_2*Upsilon*(1.0- NU_12*NU_21);
+	const double c23 =  E_2*Upsilon*(NU_23+ NU_12*NU_21);
+	const double c31 =  E_1*Upsilon*(NU_21+ NU_21*NU_23);
+	const double c32 =  E_2*Upsilon*(NU_23+ NU_12*NU_21);
+	const double c33 =  E_2*Upsilon*(1.0- NU_12*NU_21);
+	const double c44 =  G_12;
+	const double c55 =  G_12;
+	const double c66 =  G_23;
 
     rStressVector[0] =  c11 * rStrainVector[0] + c12 * rStrainVector[1] + c13 * rStrainVector[2];
     rStressVector[1] =  c21 * rStrainVector[0] + c22 * rStrainVector[1] + c23 * rStrainVector[2];

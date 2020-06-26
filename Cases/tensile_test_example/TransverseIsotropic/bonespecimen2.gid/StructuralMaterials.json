@@ -8,11 +8,13 @@
             },
             "Variables"        : {
                 "DENSITY"                              : 0.0,
-                "YOUNG_MODULUS_X"                      : 172400000000,
-                "YOUNG_MODULUS_Y"                      : 6900000000,
-		"SHEAR_MODULUS_XZ"		       : 3.45e9,
+                "YOUNG_MODULUS_X"                      : 172.4e9,
+                "YOUNG_MODULUS_Y"                      : 6.9e9,
+                "POISSON_RATIO_YZ"                     : 0.25,
                 "POISSON_RATIO_XY"                     : 0.25,
-                "POISSON_RATIO_XZ"                     : 0.25
+		"SHEAR_MODULUS_XY"		       : 3.45e9
+
+
 
             },
             "Tables"           : {}
