@@ -1,0 +1,24 @@
+{
+    "properties" : [{
+        "model_part_name" : "Structure.Parts_Plate",
+        "properties_id"   : 1,
+        "Material"        : {
+            "constitutive_law" : {
+                "name" : "LinearElasticOrthotropic3DLaw"
+            },
+            "Variables"        : {
+                "DENSITY"                              : 0.0,
+                "YOUNG_MODULUS_X"                      : 2.0e6,
+                "YOUNG_MODULUS_Y"                      : 2.0e6,
+                "YOUNG_MODULUS_Z"                      : 2.0e6,
+                "SHEAR_MODULUS_XY"                     : 8.0e5,
+                "SHEAR_MODULUS_XZ"                     : 8.0e5,
+                "SHEAR_MODULUS_YZ"                     : 8.0e5,
+                "POISSON_RATIO_XY"                     : 0.25,
+                "POISSON_RATIO_XZ"                     : 0.25,
+                "POISSON_RATIO_YZ"                     : 0.25
+            },
+            "Tables"           : {}
+        }
+    }]
+}
