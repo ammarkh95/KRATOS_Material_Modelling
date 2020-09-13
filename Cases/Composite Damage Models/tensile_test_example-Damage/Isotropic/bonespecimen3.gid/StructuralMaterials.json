@@ -1,0 +1,31 @@
+{
+    "properties" : [{
+        "model_part_name" : "Structure.Parts_specimen",
+        "properties_id"   : 1,
+        "Material"        : {
+            "constitutive_law" : {
+                "name" : "MaxStressIsotropicInstantDamageLaw"
+            },
+            "Variables"        : {
+                "DENSITY"                           : 0.0,
+                "YOUNG_MODULUS"                     : 172.4e9,
+                "POISSON_RATIO"                     : 0.25,
+                "LAMINATE_TENSILE_STRENGTH_11": 15000000,
+                "LAMINATE_COMPRESSIVE_STRENGTH_11":2e20,
+                "LAMINATE_TENSILE_STRENGTH_22":2e20,
+                "LAMINATE_COMPRESSIVE_STRENGTH_22":2e20,
+                "LAMINATE_INTERLAMINAR_TENSILE_STRENGTH_33":2e20,
+                "LAMINATE_INTERLAMINAR_COMPRESSIVE_STRENGTH_33":2e20,
+                "LAMINATE_SHEAR_STRENGTH_12":2e20,
+                "LAMINATE_SHEAR_STRENGTH_13":2e20,
+                "LAMINATE_SHEAR_STRENGTH_23":2e20,
+                "DAMAGE_FIBER_TENSION_11":0.5,
+                "DAMAGE_FIBER_COMPRESSION_11":0.0,
+                "DAMAGE_MATRIX_TENSION_22":0.0,
+                "DAMAGE_MATRIX_COMPRESSION_22":0.0,
+                "DAMAGE_SHEAR":0.0
+            },
+            "Tables"           : {}
+        }
+    }]
+}
