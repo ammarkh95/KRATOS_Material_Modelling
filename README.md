@@ -1,1 +1,1 @@
-This is a new repository for KRATOS material modelling Hiwi
+This is a repository for material modelling scripts at the chair of computational mechanics at TUM
